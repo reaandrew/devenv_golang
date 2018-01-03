@@ -1,0 +1,20 @@
+---
+- hosts: all
+  vars:
+    os:
+      user: talula
+    languages:
+      python:
+  roles:
+   - tmux
+   - zsh
+   - git
+   - vim
+#  - go
+#  - nodejs
+#  - java
+#  - python
+#  - terraform
+#  - packer
+#  - awscli
+#  - gcloud

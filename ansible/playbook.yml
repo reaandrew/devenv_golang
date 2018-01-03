@@ -1,0 +1,10 @@
+---
+- hosts: all
+  vars:
+    os:
+      user: talula
+    languages:
+      go: 
+        version: '1.9'
+  roles:
+  - go
