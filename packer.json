@@ -6,7 +6,7 @@
   "builders": [
     {
       "type": "docker",
-      "image": "reaandrew/devenv_base:0.3",
+      "image": "reaandrew/devenv_base:0.6",
       "commit": "true",
       "run_command": [
         "-d",

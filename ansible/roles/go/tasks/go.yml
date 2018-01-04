@@ -1,48 +1,76 @@
 ---
-- name: create HOME bin
-  file: path="/home/{{ os.user }}/bin" owner="{{ os.user }}" group="{{ os.user }}" state=directory
-  become: no 
-- name: download gimme
-  command: "curl -o /home/{{ os.user }}/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme"
-  become: no
+- name: Install build deps with virtual flag
+  become: yes
+  become_method: sudo
+  shell: apk add --virtual build-deps
 
-- name: make gimme executable
-  shell: chmod +x "/home/{{ os.user }}/bin/gimme"
-  become: no
+- name: Installing base packages
+  apk:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - build-base 
+    - cmake 
+    - go 
+    - llvm 
+    - perl 
+    - python-dev
+    - libxt 
+    - libx11 
+    - libstdc++
+    - go
+  become: yes
+  become_method: sudo
+########- name: create HOME bin
+########  file: path="/home/{{ os.user }}/bin" owner="{{ os.user }}" group="{{ os.user }}" state=directory
+########  become: no 
 
-- name: Install go via gimme
-  shell: "/home/{{ os.user }}/bin/gimme {{ languages.go.version }}"
-  become: no
+########- name: download gimme
+########  command: "curl -o /home/{{ os.user }}/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme"
+########  become: no
 
-- name: create GO HOME
-  file: path="/home/{{ os.user }}/go" owner="{{ os.user }}" group="{{ os.user }}" state=directory
-  become: no
+########- name: make gimme executable
+########  shell: chmod +x "/home/{{ os.user }}/bin/gimme"
+########  become: no
 
-- name: add golang PATH zsh
-  lineinfile: dest="/home/{{ os.user }}/.zshrc" line="export GOPATH=$HOME/go" 
-  become: no
+########- name: Install go via gimme
+########  shell: "echo cd /home/{{ os.user }} && GIMME_GO_VERSION={{ languages.go.version  }} /home/{{ os.user }}/bin/gimme"
+########  become: yes
+########  become_user: "{{ os.user }}"
 
-- name: add golang PATH bin to PATH zsh
-  lineinfile: dest="/home/{{ os.user }}/.zshrc" line="export PATH=$PATH:$GOPATH/bin" 
-  become: no
+########- name: Link go to the /usr/bin
+########  file:
+########    src: "/home/talula/.gimme/versions/go{{ languages.go.version  }}.linux.amd64/bin/go"
+########    dest: "/usr/bin/go"
+########    owner: "{{ os.user }}"
+########    group: "{{ os.user }}"
+########    state: link
 
-- name: add gimme envs to the zshrc
-  lineinfile: dest="/home/{{ os.user }}/.zshrc" line="source ~/.gimme/envs/go{{ languages.go.version }}.env"
-  become: False
+########- name: create GO HOME
+########  file: path="/home/{{ os.user }}/go" owner="{{ os.user }}" group="{{ os.user }}" state=directory
+########  become: no
 
-# create a directory if it doesn't exist
-- name: Create VIM directories
-  file:
-    path: "/home/{{ os.user }}/.vim/ftplugin/"
-    state: directory
-    mode: 0755
+########- name: add golang PATH zsh
+########  lineinfile: dest="/home/{{ os.user }}/.zshrc" line="export GOPATH=$HOME/go" 
+########  become: no
+
+########- name: add golang PATH bin to PATH zsh
+########  lineinfile: dest="/home/{{ os.user }}/.zshrc" line="export PATH=$PATH:$GOPATH/bin" 
+########  become: no
+
+########- name: add gimme envs to the zshrc
+########  lineinfile: dest="/home/{{ os.user }}/.zshrc" line="source ~/.gimme/envs/go{{ languages.go.version }}.env"
+########  become: no
+
 - name: vimrc for GO
   copy: src=go.vim dest="/home/{{ os.user }}/.vim/ftplugin/go.vim" owner="{{ os.user }}" group="{{ os.user }}" mode=0644
   become: no
   when:
     - languages
     - languages.go
+
 - name: vim plugins for GO
+  become: no
   git: 
     repo: "https://github.com/{{ item }}.git"
     dest: "/home/{{ os.user }}/.vim/pack/plugins/start/{{ item|replace('/', '_') }}"
@@ -53,8 +81,12 @@
     - languages
     - languages.go
 - name: Configure YouCompleteMe
+  become: no
+  shell: |
+    ./install.py --go-completer
+    chdir=/home/talula/.vim/pack/plugins/start/YouCompleteMe
+
+- name: Remove build deps
   become: yes
   become_method: sudo
-  shell: |
-    ./install.py --clang-completer --go-completer
-    chdir=/home/talula/.vim/pack/plugins/start/YouCompleteMe
+  shell: apk del --virtual build-deps
