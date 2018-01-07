@@ -21,46 +21,6 @@
     - go
   become: yes
   become_method: sudo
-########- name: create HOME bin
-########  file: path="/home/{{ os.user }}/bin" owner="{{ os.user }}" group="{{ os.user }}" state=directory
-########  become: no 
-
-########- name: download gimme
-########  command: "curl -o /home/{{ os.user }}/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme"
-########  become: no
-
-########- name: make gimme executable
-########  shell: chmod +x "/home/{{ os.user }}/bin/gimme"
-########  become: no
-
-########- name: Install go via gimme
-########  shell: "echo cd /home/{{ os.user }} && GIMME_GO_VERSION={{ languages.go.version  }} /home/{{ os.user }}/bin/gimme"
-########  become: yes
-########  become_user: "{{ os.user }}"
-
-########- name: Link go to the /usr/bin
-########  file:
-########    src: "/home/talula/.gimme/versions/go{{ languages.go.version  }}.linux.amd64/bin/go"
-########    dest: "/usr/bin/go"
-########    owner: "{{ os.user }}"
-########    group: "{{ os.user }}"
-########    state: link
-
-########- name: create GO HOME
-########  file: path="/home/{{ os.user }}/go" owner="{{ os.user }}" group="{{ os.user }}" state=directory
-########  become: no
-
-########- name: add golang PATH zsh
-########  lineinfile: dest="/home/{{ os.user }}/.zshrc" line="export GOPATH=$HOME/go" 
-########  become: no
-
-########- name: add golang PATH bin to PATH zsh
-########  lineinfile: dest="/home/{{ os.user }}/.zshrc" line="export PATH=$PATH:$GOPATH/bin" 
-########  become: no
-
-########- name: add gimme envs to the zshrc
-########  lineinfile: dest="/home/{{ os.user }}/.zshrc" line="source ~/.gimme/envs/go{{ languages.go.version }}.env"
-########  become: no
 
 - name: vimrc for GO
   copy: src=go.vim dest="/home/{{ os.user }}/.vim/ftplugin/go.vim" owner="{{ os.user }}" group="{{ os.user }}" mode=0644
@@ -84,7 +44,7 @@
   become: no
   shell: |
     ./install.py --go-completer
-    chdir=/home/talula/.vim/pack/plugins/start/YouCompleteMe
+    chdir=/home/{{ os.user }}/.vim/pack/plugins/start/YouCompleteMe
 
 - name: Remove build deps
   become: yes

@@ -2,7 +2,7 @@
 - hosts: all
   vars:
     os:
-      user: talula
+      user: vagrant
     languages:
       go: 
         version: '1.9'

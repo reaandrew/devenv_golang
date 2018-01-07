@@ -11,3 +11,6 @@ docker_tag:
 docker_push:
 	docker push reaandrew/devenv_golang:`cat VERSION`
 
+.PHONY: vagrant_package
+vagrant_package:
+	vagrant package --base devenv_golang --output devenv_golang_`cat VERSION`.box
