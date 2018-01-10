@@ -2,7 +2,4 @@
 ---
 - block:
   - include: tasks/go.yml
-    when:
-    - languages
-    - languages.go
 

@@ -1,33 +1,34 @@
 ---
-- name: Install build deps with virtual flag
+- name: Add Gopher Repository
   become: yes
   become_method: sudo
-  shell: apk add --virtual build-deps
-
+  shell: |
+    add-apt-repository -y ppa:gophers/archive
 - name: Installing base packages
-  apk:
+  apt:
     name: "{{ item }}"
     state: installed
   with_items:
-    - build-base 
+    - build-essential 
     - cmake 
-    - go 
     - llvm 
     - perl 
     - python-dev
-    - libxt 
-    - libx11 
-    - libstdc++
-    - go
+    - golang-1.9-go
   become: yes
   become_method: sudo
-
+- name: Symlink Go 
+  file:
+    src: /usr/lib/go-1.9/bin/go
+    dest: /usr/bin/go
+    owner: "{{ os.user }}"
+    group: "{{ os.user }}"
+    state: link
+  become: yes
+  become_method: sudo
 - name: vimrc for GO
   copy: src=go.vim dest="/home/{{ os.user }}/.vim/ftplugin/go.vim" owner="{{ os.user }}" group="{{ os.user }}" mode=0644
   become: no
-  when:
-    - languages
-    - languages.go
 
 - name: vim plugins for GO
   become: no
@@ -37,16 +38,8 @@
   with_items:
     - 'fatih/vim-go'
     - 'Shougo/neocomplete.vim'
-  when:
-    - languages
-    - languages.go
 - name: Configure YouCompleteMe
   become: no
   shell: |
     ./install.py --go-completer
     chdir=/home/{{ os.user }}/.vim/pack/plugins/start/YouCompleteMe
-
-- name: Remove build deps
-  become: yes
-  become_method: sudo
-  shell: apk del --virtual build-deps
