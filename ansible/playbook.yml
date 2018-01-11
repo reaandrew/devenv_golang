@@ -8,3 +8,6 @@
         version: '1.9'
   roles:
   - go
+  - docker
+  become: yes
+  become_method: sudo

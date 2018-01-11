@@ -7,11 +7,13 @@
 # you're doing.
 Vagrant.configure(2) do |config|
   config.vm.box = "devenv_base_0.10.box"
-  config.vm.box_url = "https://s3-eu-west-1.amazonaws.com/vagrant-boxes.andrewrea.co.uk/devenv_base_0.10.box"
+  config.vm.box_url = "https://github.com/reaandrew/devenv_base/releases/download/v0.10/devenv_base_0.10.box"
   config.ssh.insert_key = false
   config.ssh.forward_agent = true
 
   config.vm.provision "ansible" do |ansible|
+     ansible.galaxy_role_file = 'ansible/requirements.yml'
+     ansible.galaxy_roles_path = 'ansible/roles'
      ansible.playbook = "ansible/playbook.yml"
   end
 
